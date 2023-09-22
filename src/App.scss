@@ -1,0 +1,92 @@
+@font-face {
+  font-family: "Giants-Inline";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-1@1.1/Giants-Inline.woff2")
+    format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Giants-Bold";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-1@1.1/Giants-Bold.woff2")
+    format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: "establishRetrosansOTF";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2112@1.0/establishRetrosansOTF.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+* {
+  font-family: "Giants-Bold";
+}
+.matchDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+
+  .header,
+  .detailRow {
+    display: flex;
+    justify-content: space-between;
+
+    p {
+      width: 33%;
+      text-align: center;
+      margin: 0;
+      padding: 5px 10px;
+      border: 1px solid #e0e0e0;
+      box-sizing: border-box;
+
+      &:nth-child(2) {
+        border-left: none;
+        border-right: none;
+      }
+    }
+  }
+}
+
+ul,
+li {
+  list-style: none;
+  padding: 0;
+}
+.playerStat {
+  display: flex;
+  align-items: top;
+  img {
+    scale: 0.8;
+    vertical-align: top;
+  }
+}
+
+.gamepad {
+  &::after {
+    content: "";
+    display: inline-block;
+    background-image: url(../public/icon-gamepad.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    width: 20px;
+    height: 20px;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+}
+.keyboard {
+  &::after {
+    content: "";
+    display: inline-block;
+    background-image: url(../public/icon-keyboard.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    width: 20px;
+    height: 20px;
+    margin-left: 5px;
+  }
+}

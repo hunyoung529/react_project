@@ -1,0 +1,25 @@
+.matchDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+.matchDetail .header,
+.matchDetail .detailRow {
+  display: flex;
+  justify-content: space-between;
+}
+.matchDetail .header p,
+.matchDetail .detailRow p {
+  width: 33%;
+  text-align: center;
+  margin: 0;
+  padding: 5px 10px;
+  border: 1px solid #e0e0e0;
+  box-sizing: border-box;
+}
+.matchDetail .header p:nth-child(2),
+.matchDetail .detailRow p:nth-child(2) {
+  border-left: none;
+  border-right: none;
+}
