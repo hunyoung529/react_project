@@ -1,17 +1,18 @@
 {
   "files": {
-    "main.css": "/react_project/static/css/main.f9cdeb92.css",
-    "main.js": "/react_project/static/js/main.929af8e2.js",
+    "main.css": "/react_project/static/css/main.ce57e815.css",
+    "main.js": "/react_project/static/js/main.23d718ec.js",
     "static/js/787.a2bf511c.chunk.js": "/react_project/static/js/787.a2bf511c.chunk.js",
+    "service-worker.js": "/react_project/service-worker.js",
     "static/media/icon-gamepad.png": "/react_project/static/media/icon-gamepad.af44e25808234bf5f7a3.png",
     "static/media/icon-keyboard.png": "/react_project/static/media/icon-keyboard.cec7430fb94a915ba6e0.png",
     "index.html": "/react_project/index.html",
-    "main.f9cdeb92.css.map": "/react_project/static/css/main.f9cdeb92.css.map",
-    "main.929af8e2.js.map": "/react_project/static/js/main.929af8e2.js.map",
+    "main.ce57e815.css.map": "/react_project/static/css/main.ce57e815.css.map",
+    "main.23d718ec.js.map": "/react_project/static/js/main.23d718ec.js.map",
     "787.a2bf511c.chunk.js.map": "/react_project/static/js/787.a2bf511c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f9cdeb92.css",
-    "static/js/main.929af8e2.js"
+    "static/css/main.ce57e815.css",
+    "static/js/main.23d718ec.js"
   ]
 }
