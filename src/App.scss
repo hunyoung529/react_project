@@ -22,6 +22,9 @@
 * {
   font-family: "Giants-Bold";
 }
+
+
+
 .matchDetail {
   display: flex;
   flex-direction: column;
@@ -88,5 +91,21 @@ li {
     width: 20px;
     height: 20px;
     margin-left: 5px;
+  }
+}
+.matchRecord {
+  border: 1px solid black;
+  margin-bottom: 10px;
+  .win {
+    color: white;
+    background-color: red;
+  }
+  .draw {
+    color: white;
+    background-color: grey;
+  }
+  .loss {
+    color: white;
+    background-color: blue;
   }
 }
