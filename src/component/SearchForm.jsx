@@ -1,23 +1,24 @@
 import React, { useContext, useState, useReducer } from "react";
 import { FifaContext, dataInput } from "../Context";
 
+export const matchTypes = {
+  30: "리그 친선",
+  40: "클래식 1on1",
+  50: "공식경기",
+  52: "감독모드",
+  60: "공식 친선",
+  204: "볼타 친선",
+  214: "볼타 공식",
+  224: "볼타 AI대전",
+  234: "볼타 커스텀",
+};
 function SearchForm() {
   const [nickname, setUserNickname] = useState("");
   const { baseApi, setNickname, setLevel, setAccessId } =
     useContext(FifaContext);
 
   const [data, dispatch] = useReducer(dataInput, {});
-  const matchTypes = {
-    30: "리그 친선",
-    40: "클래식 1on1",
-    50: "공식경기",
-    52: "감독모드",
-    60: "공식 친선",
-    204: "볼타 친선",
-    214: "볼타 공식",
-    224: "볼타 AI대전",
-    234: "볼타 커스텀",
-  };
+
   const fetchUserInfo = async (e) => {
     console.log("Fetching User Info...");
     e.preventDefault();
@@ -70,6 +71,7 @@ function SearchForm() {
 
     return `${formattedDate} ${hour}시 ${minute}분`;
   }
+
   return (
     <div>
       <form onSubmit={fetchUserInfo}>

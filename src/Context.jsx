@@ -1,5 +1,10 @@
 import React, { createContext, useState } from "react";
-import { baseApi, dataInput as inputData,Static_URL } from "./component/Instance";
+import {
+  baseApi,
+  dataInput as inputData,
+  Static_URL,
+} from "./component/Instance";
+import { matchTypes } from "./component/SearchForm";
 
 export const FifaContext = createContext();
 export const dataInput = inputData;
@@ -19,6 +24,7 @@ function Context({ children }) {
         setAccessId,
         level,
         setLevel,
+        matchTypes,
       }}
     >
       {children}

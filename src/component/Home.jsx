@@ -1,7 +1,6 @@
 import React from "react";
 
 import SearchForm from "./SearchForm";
-import Record from "./Record";
 
 function Home() {
   return (
@@ -9,7 +8,6 @@ function Home() {
       <div>
         <h1>FC.GG</h1>
         <SearchForm />
-        <Record />
       </div>
     </>
   );

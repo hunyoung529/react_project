@@ -1,685 +1,126 @@
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { FifaContext } from "../Context";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
-import { Pagination } from "swiper/modules";
-import { FifaContext } from "../Context";
+import { Pagination, Navigation } from "swiper/modules";
 
-export default function Record() {
-  const { baseApi, dataInput, nickname, level, accessId, Static_URL } =
+function Record() {
+  const { baseApi, nickname, level, accessId, Static_URL, matchTypes } =
     useContext(FifaContext);
-  console.log("Nickname in Record:", nickname);
-  console.log("AccessId in Record:", accessId);
-  const [data, dispatch] = useReducer(dataInput, []);
+  const [matches, setMatches] = useState([]);
+  const [matchType, setMatchType] = useState(50);
 
-  const [selectedMatchDetail, setSelectedMatchDetail] = useState(null);
-  const [selectedMatchId, setSelectedMatchId] = useState(null);
-  const [playerName, setPlayerName] = useState({});
-  const [seasons, setSeasons] = useState([]);
-  const [recordToggle, setToggle] = useState(false);
-
-  // 1. 현재 보여지고 있는 탭에 대한 상태를 생성합니다.
-  const [activeTab, setActiveTab] = useState("summary");
-
-  // 2. 각 버튼을 클릭했을 때 해당 상태를 업데이트하는 함수를 작성합니다.
-  const handleTabChange = (tabName) => {
-    setActiveTab(tabName);
-  };
-  const handleToggle = () => {
-    setToggle(!recordToggle);
-  };
-
-  const matchResulType = {
-    1: "몰수승",
-    2: "몰수패",
-  };
   useEffect(() => {
-    fetch(`${Static_URL}/spid.json`)
-      .then((response) => response.json())
-      .then((data) => {
-        setSeasons(data);
-
-        const mapping = {};
-        data.forEach((player) => {
-          mapping[player.id] = player.name;
+    const fetchMatches = async () => {
+      try {
+        const res = await baseApi.get(`/users/${accessId}/matches`, {
+          params: {
+            matchtype: matchType,
+            offset: 0,
+            limit: 100,
+          },
         });
-        setPlayerName(mapping);
-      });
-  }, []);
-  useEffect(() => {
-    fetch(`${Static_URL}/seasonid.json`)
-      .then((response) => response.json())
-      .then((data) => setSeasons(data));
-  }, []);
-  const getSeasonImgBySeasonId = (spId) => {
-    const seasonId = String(spId).substring(0, 3);
-    const season = seasons.find((s) => s.seasonId === parseInt(seasonId));
 
-    return season ? season.seasonImg : null;
+        if (res.data) {
+          setMatches(res.data); // API 응답을 상태에 저장
+          const details = await fetchMatchDetails(res.data); // 여기서 바로 res.data를 넘겨주었습니다.
+          console.log(details); // 이제 details 배열에서 원하는 정보를 추출하여 사용하면 됩니다.
+        }
+      } catch (error) {
+        console.error("API 호출 중 오류 발생:", error);
+      }
+    };
+
+    fetchMatches();
+  }, [accessId, baseApi, matchType]);
+
+  const fetchMatchDetails = async (matchList) => {
+    let matchDetails = [];
+
+    for (let match of matchList) {
+      try {
+        const response = await baseApi.get(`/matches/${match.matchId}`); // matchId를 사용하여 API를 호출합니다.
+
+        if (response.data) {
+          matchDetails.push(response.data);
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching details for match ${match.matchId}:`,
+          error
+        );
+      }
+    }
+
+    return matchDetails;
+  };
+  // Helper function to chunk the array
+  const chunkArray = (arr, chunkSize) => {
+    const results = [];
+    while (arr.length) {
+      results.push(arr.splice(0, chunkSize));
+    }
+    return results;
   };
 
-  const renderDetailRow = (label, team1Data, team2Data) => (
-    <div className="detailRow">
-      <p>{label}</p>
-      <p>{team1Data}</p>
-      <p>{team2Data}</p>
+  const matchChunks = chunkArray([...matches], 10); // 10개 단위로 분할
+console.log();
+  return (
+    <div>
+      <p>구단주명: {nickname}</p>
+      <p>레벨: {level}</p>
+      <button
+        onClick={() => {
+          setMatchType(50);
+        }}
+      >
+        공식경기
+      </button>
+      <button
+        onClick={() => {
+          setMatchType(52);
+        }}
+      >
+        감독모드
+      </button>
+      <>
+        {matches.length === 0 ? (
+          <div>
+            <p>경기기록이 없습니다.</p>
+          </div>
+        ) : (
+          <Swiper
+            loop={true}
+            pagination={{
+              type: "fraction",
+            }}
+            navigation={true}
+            modules={[Pagination, Navigation]}
+            className="mySwiper"
+          >
+            {matchChunks.map((matchChunk, index) => (
+              <SwiperSlide key={index}>
+                <div>
+                  {matchChunk.map((match, i) => (
+                    <div key={i}>
+                      <p>
+                        매치 {i + 1}
+                        {match?.matchInfo?.[0]?.nickname}
+                        {match?.matchInfo?.[0]?.matchDetail?.matchResult}
+                        {match?.matchInfo?.[1]?.nickname}
+                        {match?.matchInfo?.[1]?.matchDetail?.matchResult}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        )}
+      </>
     </div>
   );
-
-  const fetchMatchDetail = async (id) => {
-    try {
-      const response = await baseApi.get(`/matches/${id}`);
-      setSelectedMatchDetail(response.data);
-    } catch (error) {
-      console.error("Error fetching match detail:", error);
-    }
-  };
-
-  //todo: 성공률함수 시작
-  function successRate(tryCount, successCount) {
-    if (!tryCount || tryCount === 0) {
-      return "0%";
-    }
-    const rate = (successCount / tryCount) * 100;
-    return `${rate.toFixed(2)}%`;
-  }
-
-  function passSuccessRate(teamInfo) {
-    return successRate(teamInfo.pass.passTry, teamInfo.pass.passSuccess);
-  }
-  function shortPassSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.pass.shortPassTry,
-      teamInfo.pass.shortPassSuccess
-    );
-  }
-
-  function longPassSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.pass.longPassTry,
-      teamInfo.pass.longPassSuccess
-    );
-  }
-  function throughPassSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.pass.throughPassTry,
-      teamInfo.pass.throughPassSuccess
-    );
-  }
-  function lobThoughPassSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.pass.lobbedThroughPassTry,
-      teamInfo.pass.lobbedThroughPassSuccess
-    );
-  }
-  function goalSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.shoot.effectiveShootTotal,
-      teamInfo.shoot.goalTotal
-    );
-  }
-
-  function goalInPenaltySuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.shoot.shootInPenalty,
-      teamInfo.shoot.goalInPenalty
-    );
-  }
-
-  function goalOutPenaltySuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.shoot.shootOutPenalty,
-      teamInfo.shoot.goalOutPenalty
-    );
-  }
-
-  function goalHeadingSuccessRate(teamInfo) {
-    return successRate(teamInfo.shoot.shootHeading, teamInfo.shoot.goalHeading);
-  }
-
-  function goalFreekickSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.shoot.shootFreekick,
-      teamInfo.shoot.goalFreekick
-    );
-  }
-
-  function goalPenaltyKickSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.shoot.shootPenaltyKick,
-      teamInfo.shoot.goalPenaltyKick
-    );
-  }
-  //todo: 성공률함수 시작 끝
-  function recordArray(array, size) {
-    const result = [];
-    for (let i = 0; i < array.length; i += size) {
-      result.push(array.slice(i, i + size));
-    }
-    return result;
-  }
-
-  return (
-    <>
-      {data.nickname && (
-        <>
-          <div>
-            <Swiper
-              loop={true}
-              pagination={{
-                dynamicBullets: true,
-                clickable: false,
-              }}
-              modules={[Pagination]}
-              className="mySwiper"
-            >
-              {data &&
-                data.record &&
-                recordArray(data.record, 5).map((record, recordIndex) => (
-                  <SwiperSlide key={recordIndex}>
-                    {record.map((id, index) => (
-                      <div key={index}>
-                        <p>
-                          매치 {index + 1}{" "}
-                          {selectedMatchDetail &&
-                            selectedMatchDetail.matchInfo[0].nickname}
-                          {selectedMatchDetail &&
-                            selectedMatchDetail.matchInfo[0].matchDetail
-                              .matchResult}
-                          {selectedMatchDetail &&
-                            selectedMatchDetail.matchInfo[1].nickname}
-                          {selectedMatchDetail &&
-                            selectedMatchDetail.matchInfo[1].matchDetail
-                              .matchResult}
-                        </p>
-
-                        <button
-                          onClick={(e) => {
-                            handleToggle(e);
-                            setSelectedMatchDetail(null);
-                            fetchMatchDetail(id);
-                            setSelectedMatchId(id);
-                          }}
-                        >
-                          버튼
-                        </button>
-                        {selectedMatchId === id &&
-                        selectedMatchDetail &&
-                        recordToggle ? (
-                          <div className="matchDetail">
-                            <div>
-                              {selectedMatchDetail.matchInfo[0].matchDetail
-                                .matchEndType === 0 ? (
-                                <>
-                                  <button
-                                    onClick={() => handleTabChange("summary")}
-                                  >
-                                    요약
-                                  </button>
-                                  <button
-                                    onClick={() => handleTabChange("shooting")}
-                                  >
-                                    슈팅
-                                  </button>
-                                  <button
-                                    onClick={() => handleTabChange("pass")}
-                                  >
-                                    패스
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      handleTabChange("playerStat")
-                                    }
-                                  >
-                                    선수기록
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <button
-                                    onClick={() => handleTabChange("summary")}
-                                  >
-                                    요약
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                            <div className="header">
-                              {(activeTab === "summary" ||
-                                activeTab === "shooting" ||
-                                activeTab === "pass") && (
-                                <>
-                                  <p>기록</p>
-                                  <p
-                                    className={
-                                      selectedMatchDetail.matchInfo[0]
-                                        .matchDetail.controller
-                                    }
-                                  >
-                                    {selectedMatchDetail.matchInfo[0].nickname}
-                                  </p>
-                                  <p
-                                    className={
-                                      selectedMatchDetail.matchInfo[1]
-                                        .matchDetail.controller
-                                    }
-                                  >
-                                    {selectedMatchDetail.matchInfo[1].nickname}
-                                  </p>
-                                </>
-                              )}
-
-                              {/* 'playerStat' 탭일 때만 보여지는 항목 */}
-                              {activeTab === "playerStat" && <></>}
-                            </div>
-                            {activeTab === "summary" && (
-                              <div className="summary">
-                                {selectedMatchDetail.matchInfo[0].matchDetail
-                                  .matchEndType === 0
-                                  ? renderDetailRow(
-                                      "결과",
-                                      `${selectedMatchDetail.matchInfo[0].matchDetail.matchResult}`,
-                                      `${selectedMatchDetail.matchInfo[1].matchDetail.matchResult}`
-                                    )
-                                  : renderDetailRow(
-                                      "결과",
-                                      matchResulType[
-                                        selectedMatchDetail.matchInfo[0]
-                                          .matchDetail.matchEndType
-                                      ],
-                                      matchResulType[
-                                        selectedMatchDetail.matchInfo[1]
-                                          .matchDetail.matchEndType
-                                      ],
-                                      `${selectedMatchDetail.matchInfo[0].matchDetail.matchEndType}`,
-                                      `${selectedMatchDetail.matchInfo[1].matchDetail.matchEndType}`
-                                    )}
-
-                                {renderDetailRow(
-                                  "점수",
-                                  `${selectedMatchDetail.matchInfo[0].shoot.goalTotal}`,
-                                  `${selectedMatchDetail.matchInfo[1].shoot.goalTotal}`
-                                )}
-                                {renderDetailRow(
-                                  "자책골",
-                                  `${selectedMatchDetail.matchInfo[1].shoot.ownGoal}`,
-                                  `${selectedMatchDetail.matchInfo[0].shoot.ownGoal}`
-                                )}
-                                {renderDetailRow(
-                                  "점유율",
-                                  `${selectedMatchDetail.matchInfo[0].matchDetail.possession}%`,
-                                  `${selectedMatchDetail.matchInfo[1].matchDetail.possession}%`
-                                )}
-                                {renderDetailRow(
-                                  "파울",
-                                  `${selectedMatchDetail.matchInfo[0].matchDetail.foul}회`,
-                                  `${selectedMatchDetail.matchInfo[1].matchDetail.foul}회`
-                                )}
-                                {renderDetailRow(
-                                  "옐로우카드",
-                                  `${selectedMatchDetail.matchInfo[0].matchDetail.yellowCards}장`,
-                                  `${selectedMatchDetail.matchInfo[1].matchDetail.yellowCards}장`
-                                )}
-                                {renderDetailRow(
-                                  "레드카드",
-                                  `${selectedMatchDetail.matchInfo[0].matchDetail.redCards}장`,
-                                  `${selectedMatchDetail.matchInfo[1].matchDetail.redCards}장`
-                                )}
-                                {renderDetailRow(
-                                  "드리블",
-                                  `${selectedMatchDetail.matchInfo[0].matchDetail.dribble}`,
-                                  `${selectedMatchDetail.matchInfo[1].matchDetail.dribble}`
-                                )}
-                                {renderDetailRow(
-                                  "코너킥",
-                                  `${selectedMatchDetail.matchInfo[0].matchDetail.cornerKick}`,
-                                  `${selectedMatchDetail.matchInfo[1].matchDetail.cornerKick}`
-                                )}
-                              </div>
-                            )}
-                            {activeTab === "shooting" && (
-                              <div className="shooting">
-                                {renderDetailRow(
-                                  "유효 슛",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .goalTotal
-                                  }/${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .shootTotal
-                                  } (${goalSuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .goalTotal
-                                  }/${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .shootTotal
-                                  } (${goalSuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-                                {renderDetailRow(
-                                  "박스 안 슛",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .goalInPenalty
-                                  }/${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .shootInPenalty
-                                  } (${goalInPenaltySuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .goalInPenalty
-                                  }/${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .shootInPenalty
-                                  } (${goalInPenaltySuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-                                {renderDetailRow(
-                                  "박스 밖 슛",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .goalOutPenalty
-                                  }/${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .shootOutPenalty
-                                  } (${goalOutPenaltySuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .goalOutPenalty
-                                  }/${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .shootOutPenalty
-                                  } (${goalOutPenaltySuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-                                {renderDetailRow(
-                                  "헤더",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .goalHeading
-                                  }/${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .shootHeading
-                                  } (${goalHeadingSuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .goalHeading
-                                  }/${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .shootHeading
-                                  } (${goalHeadingSuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-                                {renderDetailRow(
-                                  "프리킥",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .goalFreekick
-                                  }/${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .shootFreekick
-                                  } (${goalFreekickSuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .goalFreekick
-                                  }/${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .shootFreekick
-                                  } (${goalFreekickSuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-                                {renderDetailRow(
-                                  "패널티",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .goalPenaltyKick
-                                  }/${
-                                    selectedMatchDetail.matchInfo[0].shoot
-                                      .shootPenaltyKick
-                                  } (${goalPenaltyKickSuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .goalPenaltyKick
-                                  }/${
-                                    selectedMatchDetail.matchInfo[1].shoot
-                                      .shootPenaltyKick
-                                  } (${goalPenaltyKickSuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-                              </div>
-                            )}
-                            {activeTab === "pass" && (
-                              <div className="pass">
-                                {renderDetailRow(
-                                  "총 패스",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].pass
-                                      .passSuccess
-                                  }/${
-                                    selectedMatchDetail.matchInfo[0].pass
-                                      .passTry
-                                  }(${passSuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].pass
-                                      .passSuccess
-                                  }/${
-                                    selectedMatchDetail.matchInfo[1].pass
-                                      .passTry
-                                  }(${passSuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-                                {renderDetailRow(
-                                  "숏패스",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].pass
-                                      .shortPassSuccess
-                                  }/${
-                                    selectedMatchDetail.matchInfo[0].pass
-                                      .shortPassTry
-                                  }(${shortPassSuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].pass
-                                      .shortPassSuccess
-                                  }/${
-                                    selectedMatchDetail.matchInfo[1].pass
-                                      .shortPassTry
-                                  }(${shortPassSuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-
-                                {renderDetailRow(
-                                  "롱패스",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].pass
-                                      .longPassSuccess
-                                  }  / ${
-                                    selectedMatchDetail.matchInfo[0].pass
-                                      .longPassTry
-                                  } (${longPassSuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].pass
-                                      .longPassSuccess
-                                  } /${
-                                    selectedMatchDetail.matchInfo[1].pass
-                                      .longPassTry
-                                  }(${longPassSuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-                                {renderDetailRow(
-                                  "쓰루패스 시도",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].pass
-                                      .throughPassSuccess
-                                  }/${
-                                    selectedMatchDetail.matchInfo[0].pass
-                                      .throughPassTry
-                                  }(${throughPassSuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].pass
-                                      .throughPassSuccess
-                                  }/${
-                                    selectedMatchDetail.matchInfo[1].pass
-                                      .throughPassTry
-                                  }(${throughPassSuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-
-                                {renderDetailRow(
-                                  "로빙쓰루 시도",
-                                  `${
-                                    selectedMatchDetail.matchInfo[0].pass
-                                      .lobbedThroughPassSuccess
-                                  }/${
-                                    selectedMatchDetail.matchInfo[0].pass
-                                      .lobbedThroughPassTry
-                                  }(${lobThoughPassSuccessRate(
-                                    selectedMatchDetail.matchInfo[0]
-                                  )})`,
-                                  `${
-                                    selectedMatchDetail.matchInfo[1].pass
-                                      .lobbedThroughPassSuccess
-                                  }/${
-                                    selectedMatchDetail.matchInfo[1].pass
-                                      .lobbedThroughPassTry
-                                  }(${lobThoughPassSuccessRate(
-                                    selectedMatchDetail.matchInfo[1]
-                                  )})`
-                                )}
-                              </div>
-                            )}
-                            {activeTab === "playerStat" && (
-                              <div className="playerStat">
-                                <div className="home">
-                                  <h3
-                                    className={
-                                      selectedMatchDetail.matchInfo[0]
-                                        .matchDetail.controller
-                                    }
-                                  >
-                                    {selectedMatchDetail.matchInfo[0].nickname}
-                                  </h3>
-                                  <ul>
-                                    {(() => {
-                                      const sortedPlayers = [
-                                        ...selectedMatchDetail.matchInfo[0]
-                                          .player,
-                                      ].sort(
-                                        (a, b) =>
-                                          b.status.spRating - a.status.spRating
-                                      );
-
-                                      return sortedPlayers.map(
-                                        (playerDetail, index) => {
-                                          const imgSrc = getSeasonImgBySeasonId(
-                                            playerDetail.spId
-                                          );
-                                          return (
-                                            <li key={index}>
-                                              {imgSrc && (
-                                                <img
-                                                  src={imgSrc}
-                                                  alt="season"
-                                                />
-                                              )}
-                                              {playerDetail.spGrade}강
-                                              {playerName[playerDetail.spId] ||
-                                                playerDetail.spId}
-                                              {playerDetail.status.spRating}
-                                            </li>
-                                          );
-                                        }
-                                      );
-                                    })()}
-                                  </ul>
-                                </div>
-
-                                {/* 위와 동일한 로직을 "away"에도 적용합니다. */}
-                                <div className="away">
-                                  <h3
-                                    className={
-                                      selectedMatchDetail.matchInfo[1]
-                                        .matchDetail.controller
-                                    }
-                                  >
-                                    {selectedMatchDetail.matchInfo[1].nickname}
-                                  </h3>
-                                  <ul>
-                                    {(() => {
-                                      const sortedPlayers = [
-                                        ...selectedMatchDetail.matchInfo[1]
-                                          .player,
-                                      ].sort(
-                                        (a, b) =>
-                                          b.status.spRating - a.status.spRating
-                                      );
-
-                                      return sortedPlayers.map(
-                                        (playerDetail, index) => {
-                                          const imgSrc = getSeasonImgBySeasonId(
-                                            playerDetail.spId
-                                          );
-                                          return (
-                                            <li key={index}>
-                                              {playerDetail.status.spRating}
-                                              {playerName[playerDetail.spId] ||
-                                                playerDetail.spId}
-                                              {playerDetail.spGrade}강
-                                              {imgSrc && (
-                                                <img
-                                                  src={imgSrc}
-                                                  alt="season"
-                                                />
-                                              )}
-                                            </li>
-                                          );
-                                        }
-                                      );
-                                    })()}
-                                  </ul>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ) : null}
-                      </div>
-                    ))}
-                  </SwiperSlide>
-                ))}
-            </Swiper>
-          </div>
-        </>
-      )}
-    </>
-  );
 }
+
+export default Record;
