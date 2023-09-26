@@ -16,6 +16,9 @@
   <link rel="icon" type="image/png" href="%PUBLIC_URL%/icons/favicon-32x32.png" sizes="32x32" />
   <link rel="icon" type="image/png" href="%PUBLIC_URL%/icons/favicon-16x16.png" sizes="16x16" />
   <link rel="icon" type="image/png" href="%PUBLIC_URL%/icons/favicon-128.png" sizes="128x128" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <meta name="application-name" content="&nbsp;" />
   <meta name="msapplication-TileColor" content="#FFFFFF" />
   <meta name="msapplication-TileImage" content="mstile-144x144.png" />
@@ -63,7 +66,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('%PUBLIC_URL%/sw.js').then(reg => {
+        navigator.serviceWorker.register('/react_project/sw.js').then(reg => {
           console.log('Worker Registered');
         }).catch(err => {
           console.log('error in service worker', err)

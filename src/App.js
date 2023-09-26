@@ -16,26 +16,26 @@ function App() {
 
 function ContentComponent() {
   const { nickname } = useContext(FifaContext);
-  const contextValue = useContext(FifaContext);
-  console.log(contextValue);
   return (
-    <BrowserRouter basename="react_project">
-      <header></header>
+    <BrowserRouter basename="/react_project">
+      <header>
+        <h1>
+          <Link to="/">FC.GG</Link>
+        </h1>
+      </header>
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/Record" element={<Record />} />
+          <Route path="/Record/:nickname" element={<Record />} />
         </Routes>
       </main>
       <footer>
-        <Link to="/">메인</Link>
         {nickname !== null && (
           <>
             <Link to="/trend">트렌드</Link>
-            <Link to="/Record">기록</Link>
+            <Link to={`/Record/${nickname}`}>기록</Link>
           </>
         )}
-        <Link to="/setting">설정</Link>
       </footer>
     </BrowserRouter>
   );

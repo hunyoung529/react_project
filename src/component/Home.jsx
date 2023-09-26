@@ -6,7 +6,7 @@ function Home() {
   return (
     <>
       <div>
-        <h1>FC.GG</h1>
+        
         <SearchForm />
       </div>
     </>

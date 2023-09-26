@@ -5,46 +5,30 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination, Navigation } from "swiper/modules";
 import MatchItems from "./MatchItems";
+import { useParams } from "react-router-dom";
 
 function Record() {
-  const {
-    baseApi,
-    nickname,
-    level,
-    accessId,
-    Static_URL,
-    matchTypes,
-    inputData,
-  } = useContext(FifaContext);
+  const { baseApi, level, nickname, accessId, inputData } =
+    useContext(FifaContext);
+  // let { nickname } = useParams();
   const [matches, setMatches] = useState([]);
   const [matchType, setMatchType] = useState(50);
   const [matchDetails, setMatchDetails] = useState([]);
 
-  const initialState = {
-    nickname: "",
-    level: null,
-    accessId: "",
-    rating: null,
-    record: null,
-    recordData: null,
-  };
-  const [state, dispatch] = useReducer(inputData, initialState);
-
+  // 경기 목록 가져오기
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const res = await baseApi.get(
-          "/users/2dc24d67207e09e4808966fe/matches",
-          {
-            params: {
-              matchtype: 50,
-              offset: 0,
-              limit: 3,
-            },
-          }
-        );
+        const res = await baseApi.get(`/users/${accessId}/matches`, {
+          params: {
+            matchtype: matchType,
+            offset: 0,
+            limit: 100,
+          },
+        });
+
         if (res.data) {
-          setMatches((prevMatches) => [...prevMatches, ...res.data]);
+          setMatches(() => res.data);
         }
       } catch (error) {
         console.error("API 호출 중 오류 발생:", error);
@@ -52,24 +36,19 @@ function Record() {
     };
 
     fetchMatches();
-  }, [accessId, baseApi]);
+  }, [matchType]);
 
+  // 경기 세부 정보 가져오기
   useEffect(() => {
     async function fetchData() {
-      let details = []; // 임시 배열 생성
-
-      for (let matchId of matches) {
-        try {
-          const response = await baseApi.get(`/matches/${matchId}`);
-          if (response.data) {
-            details.push(response.data); // 세부 정보를 임시 배열에 추가
-          }
-        } catch (error) {
-          console.error(`API 호출 중 오류 발생 (matchId: ${matchId}):`, error);
-        }
+      try {
+        const details = await Promise.all(
+          matches.map((matchId) => baseApi.get(`/matches/${matchId}`))
+        );
+        setMatchDetails(details.map((detail) => detail.data));
+      } catch (error) {
+        console.error("API 호출 중 오류 발생:", error);
       }
-
-      setMatchDetails(details); // 모든 세부 정보에 대한 API 호출이 완료된 후 상태 설정
     }
 
     fetchData();
@@ -77,8 +56,9 @@ function Record() {
   // Helper function to chunk the array
   const chunkArray = (arr, chunkSize) => {
     const results = [];
-    while (arr.length) {
-      results.push(arr.splice(0, chunkSize));
+    const clonedArr = [...arr];
+    while (clonedArr.length) {
+      results.push(clonedArr.splice(0, chunkSize));
     }
     return results;
   };
@@ -123,7 +103,7 @@ function Record() {
                     const detail = matchDetails.find(
                       (detail) => detail.matchId === matchId
                     );
-                    if (!detail) return null; // or you can return some placeholder component
+                    if (!detail) return null;
                     return <MatchItems key={i} matchData={detail} />;
                   })}
                 </div>

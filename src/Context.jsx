@@ -9,7 +9,7 @@ import { matchTypes } from "./component/SearchForm";
 export const FifaContext = createContext();
 export const dataInput = inputData;
 function Context({ children }) {
-  const [nickname, setNickname] = useState("null");
+  const [nickname, setNickname] = useState(null);
   const [level, setLevel] = useState(null);
   const [accessId, setAccessId] = useState(null);
   return (

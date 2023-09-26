@@ -41,17 +41,7 @@ export default function Setting() {
         setPlayerName(mapping);
       });
   }, []);
-  useEffect(() => {
-    fetch(`${Static_URL}/seasonid.json`)
-      .then((response) => response.json())
-      .then((data) => setSeasons(data));
-  }, []);
-  const getSeasonImgBySeasonId = (spId) => {
-    const seasonId = String(spId).substring(0, 3);
-    const season = seasons.find((s) => s.seasonId === parseInt(seasonId));
-
-    return season ? season.seasonImg : null;
-  };
+;
 
 
 
@@ -64,82 +54,6 @@ export default function Setting() {
     }
   };
 
-  //todo: 성공률함수 시작
-  function successRate(tryCount, successCount) {
-    if (!tryCount || tryCount === 0) {
-      return "0%";
-    }
-    const rate = (successCount / tryCount) * 100;
-    return `${rate.toFixed(2)}%`;
-  }
-
-  function passSuccessRate(teamInfo) {
-    return successRate(teamInfo.pass.passTry, teamInfo.pass.passSuccess);
-  }
-  function shortPassSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.pass.shortPassTry,
-      teamInfo.pass.shortPassSuccess
-    );
-  }
-
-  function longPassSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.pass.longPassTry,
-      teamInfo.pass.longPassSuccess
-    );
-  }
-  function throughPassSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.pass.throughPassTry,
-      teamInfo.pass.throughPassSuccess
-    );
-  }
-  function lobThoughPassSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.pass.lobbedThroughPassTry,
-      teamInfo.pass.lobbedThroughPassSuccess
-    );
-  }
-  function goalSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.shoot.effectiveShootTotal,
-      teamInfo.shoot.goalTotal
-    );
-  }
-
-  function goalInPenaltySuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.shoot.shootInPenalty,
-      teamInfo.shoot.goalInPenalty
-    );
-  }
-
-  function goalOutPenaltySuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.shoot.shootOutPenalty,
-      teamInfo.shoot.goalOutPenalty
-    );
-  }
-
-  function goalHeadingSuccessRate(teamInfo) {
-    return successRate(teamInfo.shoot.shootHeading, teamInfo.shoot.goalHeading);
-  }
-
-  function goalFreekickSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.shoot.shootFreekick,
-      teamInfo.shoot.goalFreekick
-    );
-  }
-
-  function goalPenaltyKickSuccessRate(teamInfo) {
-    return successRate(
-      teamInfo.shoot.shootPenaltyKick,
-      teamInfo.shoot.goalPenaltyKick
-    );
-  }
-  //todo: 성공률함수 시작 끝
   function recordArray(array, size) {
     const result = [];
     for (let i = 0; i < array.length; i += size) {
@@ -266,11 +180,11 @@ export default function Setting() {
                         </div>
                         {activeTab === "summary" && (
                           <div className="summary">
-                            {selectedMatchDetail.matchInfo[0].matchDetail
+                            {homeInfo.matchDetail
                               .matchEndType === 0
                               ? renderDetailRow(
                                   "결과",
-                                  `${selectedMatchDetail.matchInfo[0].matchDetail.matchResult}`,
+                                  `${homeInfo.matchDetail.matchResult}`,
                                   `${selectedMatchDetail.matchInfo[1].matchDetail.matchResult}`
                                 )
                               : renderDetailRow(

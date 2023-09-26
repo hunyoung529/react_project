@@ -19,18 +19,16 @@
   font-weight: normal;
   font-style: normal;
 }
+a{
+  text-decoration: none;
+}
 * {
   font-family: "Giants-Bold";
+  background-color: black;
+  color: #0aff60ff;
 }
 
-
-
 .matchDetail {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-
   .header,
   .detailRow {
     display: flex;
@@ -51,7 +49,15 @@
     }
   }
 }
-
+.home{
+  p{text-align: right;
+}
+  ul{
+    li{
+      text-align: right;
+    }
+  }
+}
 ul,
 li {
   list-style: none;
@@ -59,7 +65,15 @@ li {
 }
 .playerStat {
   display: flex;
-  align-items: top;
+  justify-content: space-between;
+  ul {
+    li {
+      font-size: 12px;
+      span{
+        margin-right: 5px;
+      }
+    }
+  }
   img {
     scale: 0.8;
     vertical-align: top;
@@ -68,34 +82,34 @@ li {
 
 .gamepad {
   &::after {
-    content: "";
-    display: inline-block;
-    background-image: url(../public/icon-gamepad.png);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    width: 20px;
-    height: 20px;
+    content: "sports_esports"; /* 'keyboard'는 예시입니다. 사용하려는 아이콘의 이름을 여기에 적으세요. */
+    font-family: "Material Icons";
+    color: white;
+    font-size: 20px; /* 원하는 크기에 따라 조절 */
     margin-left: 5px;
-    vertical-align: middle;
   }
 }
 .keyboard {
   &::after {
-    content: "";
-    display: inline-block;
-    background-image: url(../public/icon-keyboard.png);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    width: 20px;
-    height: 20px;
+    content: "keyboard"; /* 'keyboard'는 예시입니다. 사용하려는 아이콘의 이름을 여기에 적으세요. */
+    font-family: "Material Icons";
+    color: white;
+    font-size: 20px; /* 원하는 크기에 따라 조절 */
     margin-left: 5px;
   }
 }
+
+.keyboard,
+.gamepad {
+  span {
+    margin-right: 5px;
+  }
+}
 .matchRecord {
-  border: 1px solid black;
+  position: relative;
+  border: 1px solid whitesmoke;
   margin-bottom: 10px;
+
   .win {
     color: white;
     background-color: red;
@@ -107,5 +121,18 @@ li {
   .loss {
     color: white;
     background-color: blue;
+  }
+
+  .matchDay {
+    svg {
+      float: right;
+      cursor: pointer;
+    }
+  }
+  .matchDetail {
+    flex-direction: column;
+    display: flex;
+    gap: 10px;
+    padding: 10px;
   }
 }

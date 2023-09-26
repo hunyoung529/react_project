@@ -1,6 +1,22 @@
 import React, { useContext, useState, useReducer } from "react";
 import { FifaContext, dataInput } from "../Context";
 
+export function formatDate(achievedDate) {
+  if (!achievedDate) return "";
+
+  const date = new Date(achievedDate);
+  const formattedDate = date.toLocaleString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const hour = date.getHours().toString().padStart(2, "0");
+  const minute = date.getMinutes().toString().padStart(2, "0");
+
+  return `${formattedDate} ${hour}시 ${minute}분`;
+}
+
 export const matchTypes = {
   30: "리그 친선",
   40: "클래식 1on1",
@@ -56,21 +72,6 @@ function SearchForm() {
       console.error("Error fetching max division:", error);
     }
   };
-  function formatDate(achievedDate) {
-    if (!achievedDate) return "";
-
-    const date = new Date(achievedDate);
-    const formattedDate = date.toLocaleString("ko-KR", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-    const hour = date.getHours().toString().padStart(2, "0");
-    const minute = date.getMinutes().toString().padStart(2, "0");
-
-    return `${formattedDate} ${hour}시 ${minute}분`;
-  }
 
   return (
     <div>
