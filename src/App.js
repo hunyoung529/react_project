@@ -19,7 +19,7 @@ function ContentComponent() {
   const { nickname } = useContext(FifaContext);
 
   return (
-    <BrowserRouter basename="/">
+    <BrowserRouter basename="/react_project">
       <header>
         <h1>
           <Link to="/">FC.GG</Link>
