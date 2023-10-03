@@ -19,15 +19,22 @@
   font-weight: normal;
   font-style: normal;
 }
-a{
+a {
   text-decoration: none;
+  color: inherit;
 }
 * {
   font-family: "Giants-Bold";
   background-color: black;
-  color: #0aff60ff;
+  color: white;
 }
-
+h1,
+h2,
+h3 {
+  color: #0aff60;
+  width: 100%;
+  text-align: center;
+}
 .matchDetail {
   .header,
   .detailRow {
@@ -49,11 +56,12 @@ a{
     }
   }
 }
-.home{
-  p{text-align: right;
-}
-  ul{
-    li{
+.home {
+  p {
+    text-align: right;
+  }
+  ul {
+    li {
       text-align: right;
     }
   }
@@ -69,7 +77,7 @@ li {
   ul {
     li {
       font-size: 12px;
-      span{
+      span {
         margin-right: 5px;
       }
     }
@@ -112,13 +120,16 @@ li {
 
   .win {
     color: white;
+    padding: 2px 3px;
     background-color: red;
   }
   .draw {
     color: white;
+    padding: 2px 3px;
     background-color: grey;
   }
   .loss {
+    padding: 2px 3px;
     color: white;
     background-color: blue;
   }
@@ -135,4 +146,49 @@ li {
     gap: 10px;
     padding: 10px;
   }
+}
+footer {
+  color: #0aff60;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  h2 {
+    a {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+form {
+  margin-top: 50px;
+  margin-bottom: 40px;
+  text-align: center;
+  input,
+  button {
+    padding: 5px;
+    border: 1px solid #0aff60;
+  }
+  ::placeholder {
+    color: white;
+  }
+  button {
+    margin-left: 10px;
+  }
+}
+.userInfo,
+.rank-mode,
+.coach-mode {
+  margin: 0 auto;
+  h3 {
+    text-align: center;
+  }
+  width: 80%;
+  p {
+    text-align: left;
+  }
+}
+.highlights {
+  color: #0aff60;
+  margin-right: 5px;
 }

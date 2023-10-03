@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FifaContext } from "../Context";
+import { Link } from "react-router-dom";
 
 function MatchDetail({ homeInfo, awayInfo, matchResulType, activeTab }) {
   const renderDetailRow = (label, team1Data, team2Data) => (
@@ -9,7 +10,7 @@ function MatchDetail({ homeInfo, awayInfo, matchResulType, activeTab }) {
       <p className="team2Data">{team2Data}</p>
     </div>
   );
-  const { Static_URL } = useContext(FifaContext);
+  const { Static_URL,setPlayerDetail } = useContext(FifaContext);
   const [seasons, setSeasons] = useState([]);
   const [playerName, setPlayerName] = useState({});
   useEffect(() => {
@@ -307,10 +308,18 @@ function MatchDetail({ homeInfo, awayInfo, matchResulType, activeTab }) {
                 const imgSrc = getSeasonImgBySeasonId(playerDetail.spId);
                 return (
                   <li key={index}>
-                    +{playerDetail.spGrade}
-                    {playerName[playerDetail.spId] || playerDetail.spId}
-                    {playerDetail.status.spRating}
+                    <span>+{playerDetail.spGrade}</span>
+
+                    {/* 선수 이름을 클릭하면 해당 선수의 상세 페이지로 이동 */}
+                    <Link
+                      to={`/Record/${homeInfo.nickname}/${playerDetail.spId}`}onClick={() => setPlayerDetail(playerDetail)}
+                    >
+                      {playerName[playerDetail.spId] || playerDetail.spId}
+                    </Link>
+
+                    <span>{playerDetail.status.spRating}</span>
                     {imgSrc && <img src={imgSrc} alt="season" />}
+                    
                   </li>
                 );
               });
@@ -332,7 +341,14 @@ function MatchDetail({ homeInfo, awayInfo, matchResulType, activeTab }) {
                   <li key={index}>
                     {imgSrc && <img src={imgSrc} alt="season" />}
                     <span>{playerDetail.status.spRating}</span>
-                    {playerName[playerDetail.spId] || playerDetail.spId}
+
+                    {/* 선수 이름을 클릭하면 해당 선수의 상세 페이지로 이동 */}
+                    <Link
+                      to={`/Record/${awayInfo.nickname}/${playerDetail.spId}`}onClick={() => setPlayerDetail(playerDetail)}
+                    >
+                      {playerName[playerDetail.spId] || playerDetail.spId}
+                    </Link>
+
                     <span>+{playerDetail.spGrade}</span>
                   </li>
                 );

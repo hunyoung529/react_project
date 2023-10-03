@@ -5,6 +5,7 @@ import Home from "./component/Home";
 import Record from "./component/Record";
 import { FifaContext } from "./Context";
 import { useContext } from "react";
+import PlayerDetail from "./component/PlayerDetail";
 
 function App() {
   return (
@@ -16,8 +17,9 @@ function App() {
 
 function ContentComponent() {
   const { nickname } = useContext(FifaContext);
+
   return (
-    <BrowserRouter basename="/react_project">
+    <BrowserRouter basename="/">
       <header>
         <h1>
           <Link to="/">FC.GG</Link>
@@ -26,14 +28,20 @@ function ContentComponent() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/Record" element={<Record />} />
           <Route path="/Record/:nickname" element={<Record />} />
+          <Route
+            path="/Record/:nickname/:playerId"
+            element={<PlayerDetail />}
+          />
         </Routes>
       </main>
       <footer>
         {nickname !== null && (
           <>
-            <Link to="/trend">트렌드</Link>
-            <Link to={`/Record/${nickname}`}>기록</Link>
+            <h2>
+              <Link to={`/Record/${nickname}`}>경기 기록 보기 </Link>
+            </h2>
           </>
         )}
       </footer>

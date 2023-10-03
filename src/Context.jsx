@@ -12,6 +12,10 @@ function Context({ children }) {
   const [nickname, setNickname] = useState(null);
   const [level, setLevel] = useState(null);
   const [accessId, setAccessId] = useState(null);
+  const [playerDetail, setPlayerDetail] = useState(null);
+  const [playerName, setPlayerName] = useState({});
+  const [playerId, setPlayerId] = useState();
+  const [matches, setMatches] = useState([]);
   return (
     <FifaContext.Provider
       value={{
@@ -25,6 +29,13 @@ function Context({ children }) {
         level,
         setLevel,
         matchTypes,
+        playerDetail,
+        setPlayerDetail,
+        playerName,
+        setPlayerName,
+        playerId,
+        matches,
+        setMatches,
       }}
     >
       {children}

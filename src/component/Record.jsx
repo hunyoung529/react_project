@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FifaContext } from "../Context";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -8,17 +8,31 @@ import MatchItems from "./MatchItems";
 import { useParams } from "react-router-dom";
 
 function Record() {
-  const { baseApi, level, nickname, accessId, inputData } =
-    useContext(FifaContext);
-  // let { nickname } = useParams();
-  const [matches, setMatches] = useState([]);
+  const {
+    baseApi,
+    matches,
+    setMatches,
+    nickname,
+    setNickname,
+    level,
+    setLevel,
+    accessId,
+    setAccessId,
+  } = useContext(FifaContext);
+  const { nickname: urlNickname } = useParams();
   const [matchType, setMatchType] = useState(50);
   const [matchDetails, setMatchDetails] = useState([]);
 
-  // 경기 목록 가져오기
   useEffect(() => {
-    const fetchMatches = async () => {
+    const fetchUserDataAndMatches = async () => {
       try {
+        const userRes = await baseApi.get(`/users?nickname=${urlNickname}`);
+        const { accessId, nickname, level } = userRes.data;
+
+        setNickname(nickname);
+        setLevel(level);
+        setAccessId(accessId);
+
         const res = await baseApi.get(`/users/${accessId}/matches`, {
           params: {
             matchtype: matchType,
@@ -26,7 +40,6 @@ function Record() {
             limit: 100,
           },
         });
-
         if (res.data) {
           setMatches(() => res.data);
         }
@@ -35,10 +48,25 @@ function Record() {
       }
     };
 
-    fetchMatches();
-  }, [matchType]);
+    if (urlNickname) {
+      fetchUserDataAndMatches();
+    }
+  }, [urlNickname, matchType]);
 
-  // 경기 세부 정보 가져오기
+  useEffect(() => {
+    const fetchMaxDivision = async (accessId) => {
+      try {
+        await baseApi.get(`/users/${accessId}/maxdivision`);
+      } catch (error) {
+        console.error("Error fetching max division:", error);
+      }
+    };
+
+    if (accessId) {
+      fetchMaxDivision(accessId);
+    }
+  }, [accessId]);
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -51,9 +79,11 @@ function Record() {
       }
     }
 
-    fetchData();
+    if (matches.length > 0) {
+      fetchData();
+    }
   }, [matches]);
-  // Helper function to chunk the array
+
   const chunkArray = (arr, chunkSize) => {
     const results = [];
     const clonedArr = [...arr];
@@ -63,35 +93,21 @@ function Record() {
     return results;
   };
 
-  const matchChunks = chunkArray([...matches], 10); // 10개 단위로 분할
+  const matchChunks = chunkArray([...matches], 10);
 
   return (
     <div>
       <p>구단주명: {nickname}</p>
       <p>레벨: {level}</p>
-      <button
-        onClick={() => {
-          setMatchType(50);
-        }}
-      >
-        공식경기
-      </button>
-      <button
-        onClick={() => {
-          setMatchType(52);
-        }}
-      >
-        감독모드
-      </button>
+      <button onClick={() => setMatchType(50)}>공식경기</button>
+      <button onClick={() => setMatchType(52)}>감독모드</button>
       <>
         {matches.length === 0 ? (
           <div>경기기록이 없습니다.</div>
         ) : (
           <Swiper
             loop={true}
-            pagination={{
-              type: "fraction",
-            }}
+            pagination={{ type: "fraction" }}
             navigation={true}
             modules={[Pagination, Navigation]}
             className="mySwiper"

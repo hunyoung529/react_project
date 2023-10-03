@@ -47,15 +47,18 @@ function SearchForm() {
 
     try {
       const userRes = await baseApi.get(`/users?nickname=${nicknameCheck}`);
+
+      // 여기에 console.log를 추가합니다.
+
       const { accessId, nickname, level } = userRes.data;
+      console.log(userRes.data);
       setNickname(nickname);
       setLevel(level);
       setAccessId(accessId);
       dispatch({ type: "nickname", d: { nickname, level, accessId } });
       fetchMaxDivision(accessId);
     } catch (error) {
-      console.error("Error fetching data:", error);
-      alert("데이터를 가져오는 데 실패했습니다.");
+      console.error("API 호출 오류:", error);
     }
   };
 
@@ -87,22 +90,41 @@ function SearchForm() {
 
       {data.nickname && (
         <>
-          <p>구단주명: {data.nickname}</p>
-          <p>레벨: {data.level}</p>
+          <div className="userInfo">
+            <p>
+              <span className="highlights">구단주명:</span> {data.nickname}
+            </p>
+            <p>
+              {" "}
+              <span className="highlights">레벨:</span>
+              {data.level}
+            </p>
+          </div>
           {data.rating && (
             <div className="top-rating">
-              <p>
-                {matchTypes[data.rating["0"]?.matchType]}
-                레이팅:
-                {data.rating["0"]?.division}점 달성일:
-                {formatDate(data.rating["0"]?.achievementDate)}
-              </p>
-              <p>
-                {matchTypes[data.rating["1"]?.matchType]}
-                레이팅:
-                {data.rating["1"]?.division}점 달성일:
-                {formatDate(data.rating["1"]?.achievementDate)}
-              </p>
+              <div className="rank-mode">
+                <h3> {matchTypes[data.rating["0"]?.matchType]}</h3>
+                <p>
+                  <span className="highlights">탑레이팅:</span>
+                  {data.rating["0"]?.division}점
+                </p>
+                <p>
+                  <span className="highlights">달성일:</span>
+                  {formatDate(data.rating["0"]?.achievementDate)}
+                </p>
+              </div>
+
+              <div className="coach-mode">
+                <h3> {matchTypes[data.rating["1"]?.matchType]}</h3>
+                <p>
+                  <span className="highlights">탑레이팅:</span>
+                  {data.rating["1"]?.division}점
+                </p>
+                <p>
+                  <span className="highlights">달성일:</span>
+                  {formatDate(data.rating["1"]?.achievementDate)}
+                </p>
+              </div>
             </div>
           )}
         </>
